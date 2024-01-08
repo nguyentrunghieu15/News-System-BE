@@ -8,6 +8,7 @@ class hdfs():
         pass
 
     def put_news(path_file,url,delete=False):
+        print(f'Put hdfs {url}, file:{path_file}')
         # Specify the file you want to upload
         files = {'file': (path_file, open(path_file, 'rb'))}
 
