@@ -1,6 +1,12 @@
 
 from flask import jsonify
 from pymongo import MongoClient
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+import re
 
 
 class MongoService():
@@ -36,10 +42,10 @@ class MongoService():
         self.close()
         return new_ids
     
-    def find(self,query,exclude,limit):
+    def find(self,query,exclude,skip,limit):
         self.create_client()
         db = self.client[self.database_name]
-        news= list(db['news'].find(query,exclude).limit(limit))
+        news= list(db['news'].find(query,exclude).skip(skip).limit(limit))
         data = []
         for doc in news:
             doc['_id'] = str(doc['_id'])
@@ -54,4 +60,22 @@ class MongoService():
         new['_id'] = str(new['_id'])
         self.close()
         return jsonify(new)
+    
+    def search_article(self,q,skip,limit):
+        stop_words = set(stopwords.words('english'))
+        word_tokens = word_tokenize(q)
+        tokens = [w for w in word_tokens if w.lower() not in stop_words and len(w)>1]
 
+        # Tạo biểu thức chính quy để tìm kiếm các token
+        regex_pattern = "|".join(map(re.escape, tokens))
+        query = {"title": {"$regex": regex_pattern, "$options": "i"}}
+
+        self.create_client()
+        db = self.client[self.database_name]
+        news= list(db['news'].find(query,{}).skip(skip).limit(limit))
+        data = []
+        for doc in news:
+            doc['_id'] = str(doc['_id'])
+            data.append(doc)
+        self.close()
+        return jsonify(data)
