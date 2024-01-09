@@ -1,1 +1,4 @@
-pyspark
+Flask
+pymongo
+python-dotenv
+# pyspark
