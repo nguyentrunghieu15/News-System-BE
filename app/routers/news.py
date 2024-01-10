@@ -28,6 +28,10 @@ def get_articles(id):
     }
     return mongo_service.find_one(query)
 
+@news_blueprint.route('/lastest',methods=['GET'])
+def get_lastest():
+    return mongo_service.find_lastest_news()
+
 @news_blueprint.route('/search',methods=['GET'])
 def search_article():
     query = request.args.to_dict()
